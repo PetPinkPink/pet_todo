@@ -1,8 +1,8 @@
 class Todo {
-  final String id;
-  final String title;
-  bool done;
-  final DateTime time; 
+  final String id;    
+  String title;       
+  bool done;          
+  DateTime time;     
 
   Todo({
     required this.id,

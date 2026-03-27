@@ -13,12 +13,10 @@ class AppPage extends StatefulWidget {
   State<AppPage> createState() => _AppPageState();
 }
 
-
 class _AppPageState extends State<AppPage> {
   int _drawerIndex = 0; 
   int _bottomNavIndex = 0; 
   
- 
   List<Todo> todos = [];
   List<Map<String, dynamic>> notes = [];
   final TextEditingController _noteController = TextEditingController();
@@ -28,10 +26,71 @@ class _AppPageState extends State<AppPage> {
   @override
   void initState() {
     super.initState();
-    
     _loadData();
   }
 
+
+  void _showEditNoteDialog(int index) {
+    final note = notes[index];
+    final TextEditingController editController = TextEditingController(text: note['text']);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text("Sửa ghi chú", style: TextStyle(color: myPurple, fontWeight: FontWeight.bold)),
+        content: TextField(controller: editController, autofocus: true),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Hủy")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: myPurple),
+            onPressed: () {
+              if (editController.text.trim().isNotEmpty) {
+                setState(() {
+                  notes[index]['text'] = editController.text.trim();
+                  notes[index]['time'] = DateTime.now();
+                });
+                _saveNotes();
+                Navigator.pop(context);
+              }
+            },
+            child: const Text("Lưu", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  void _showEditTodoDialog(Todo todo) {
+    final TextEditingController editController = TextEditingController(text: todo.title);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text("Sửa công việc", style: TextStyle(color: myPurple, fontWeight: FontWeight.bold)),
+        content: TextField(controller: editController, autofocus: true),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Hủy")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: myPurple),
+            onPressed: () {
+              if (editController.text.trim().isNotEmpty) {
+                setState(() {
+                
+                  todo.title = editController.text.trim();
+                });
+                _saveTodos();
+                Navigator.pop(context);
+              }
+            },
+            child: const Text("Lưu", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+ 
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
     final todoData = prefs.getString("todos");
@@ -78,10 +137,9 @@ class _AppPageState extends State<AppPage> {
 
   @override
   Widget build(BuildContext context) {
-   
     final List<Widget> drawerPages = [
-      _buildMainAppStructure(), // Index 0
-      const AuthorPage(),       // Index 1
+      _buildMainAppStructure(), 
+      const AuthorPage(),       
     ];
 
     return Scaffold(
@@ -98,7 +156,6 @@ class _AppPageState extends State<AppPage> {
         ),
       ),
       drawer: _buildDrawer(),
-      // IndexedStack ở đây cực kỳ quan trọng để giữ dữ liệu trang App khi sang trang Tác giả
       body: IndexedStack(
         index: _drawerIndex,
         children: drawerPages,
@@ -119,7 +176,9 @@ class _AppPageState extends State<AppPage> {
             },
             onToggle: (todo, v) { setState(() => todo.done = v ?? false); _saveTodos(); },
             onDelete: (todo) { setState(() => todos.remove(todo)); _saveTodos(); }, 
-            onEdit: (p1) {}, drawer: Container()
+            // FIX DÒNG 176: Khai báo rõ kiểu dữ liệu (Todo todo)
+            onEdit: (Todo todo) => _showEditTodoDialog(todo), 
+            drawer: Container()
           ),
           StatsPage(todos: todos),
           _buildNotesTab(),
@@ -223,9 +282,11 @@ class _AppPageState extends State<AppPage> {
               final n = notes[i];
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 child: ListTile(
+                  onTap: () => _showEditNoteDialog(i), // Nhấn để sửa ghi chú
                   title: Text(n['text']),
-                  subtitle: Text("${n['time'].hour}:${n['time'].minute}"),
+                  subtitle: Text("${n['time'].hour}:${n['time'].minute.toString().padLeft(2, '0')}"),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () { setState(() => notes.removeAt(i)); _saveNotes(); }

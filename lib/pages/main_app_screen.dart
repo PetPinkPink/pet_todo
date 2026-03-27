@@ -11,7 +11,6 @@ class MainAppScreen extends StatefulWidget {
   State<MainAppScreen> createState() => _MainAppScreenState();
 }
 
-
 class _MainAppScreenState extends State<MainAppScreen> with AutomaticKeepAliveClientMixin {
   int _bottomIndex = 0;
   List<Todo> todos = []; 
@@ -20,7 +19,6 @@ class _MainAppScreenState extends State<MainAppScreen> with AutomaticKeepAliveCl
   
   bool _isLoadingApi = false;
 
-  
   static const Color myPurple = Color.fromARGB(255, 194, 75, 237);
 
   @override
@@ -30,6 +28,61 @@ class _MainAppScreenState extends State<MainAppScreen> with AutomaticKeepAliveCl
   void initState() {
     super.initState();
     _fetchApiTodos();
+  }
+
+
+  void _showEditTodoDialog(Todo todo) {
+    final TextEditingController editController = TextEditingController(text: todo.title);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Sửa công việc", style: TextStyle(color: myPurple, fontWeight: FontWeight.bold)),
+        content: TextField(controller: editController, autofocus: true),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Hủy")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: myPurple),
+            onPressed: () {
+              if (editController.text.trim().isNotEmpty) {
+                setState(() {
+                  todo.title = editController.text.trim();
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text("Lưu", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditNoteDialog(int index) {
+    final note = notes[index];
+    final TextEditingController editController = TextEditingController(text: note['text']);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Sửa ghi chú", style: TextStyle(color: myPurple, fontWeight: FontWeight.bold)),
+        content: TextField(controller: editController, autofocus: true),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Hủy")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: myPurple),
+            onPressed: () {
+              if (editController.text.trim().isNotEmpty) {
+                setState(() {
+                  notes[index]['text'] = editController.text.trim();
+                  notes[index]['time'] = DateTime.now();
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text("Lưu", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _fetchApiTodos() async {
@@ -92,7 +145,8 @@ class _MainAppScreenState extends State<MainAppScreen> with AutomaticKeepAliveCl
           onAdd: (title, time) => setState(() => todos.add(Todo(id: DateTime.now().toString(), title: title, time: time))),
           onToggle: (t, v) => setState(() => t.done = v ?? false),
           onDelete: (t) => setState(() => todos.remove(t)), 
-          onEdit: (int p1) {  }, 
+          
+          onEdit: (Todo t) => _showEditTodoDialog(t), 
           drawer: Container()
         ),
       StatsPage(todos: todos),
@@ -103,7 +157,7 @@ class _MainAppScreenState extends State<MainAppScreen> with AutomaticKeepAliveCl
       body: IndexedStack(index: _bottomIndex, children: _tabs),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _bottomIndex,
-        selectedItemColor: myPurple, // Màu tím Pet Todo
+        selectedItemColor: myPurple, 
         unselectedItemColor: Colors.grey,
         onTap: (index) => setState(() => _bottomIndex = index),
         items: const [
@@ -169,6 +223,8 @@ class _MainAppScreenState extends State<MainAppScreen> with AutomaticKeepAliveCl
                     borderRadius: BorderRadius.circular(15)
                   ),
                   child: ListTile(
+                    
+                    onTap: () => _showEditNoteDialog(i),
                     leading: const Icon(Icons.edit_note, color: Colors.orangeAccent),
                     title: Text(n['text'] ?? "", style: const TextStyle(fontWeight: FontWeight.w500)),
                     subtitle: Text("Lưu lúc: $formattedTime - ${n['time'].day}/${n['time'].month}"),

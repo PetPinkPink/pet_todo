@@ -7,6 +7,7 @@ class TodoTab extends StatelessWidget {
   final Function(String title, DateTime time) onAdd;
   final Function(Todo, bool?) onToggle;
   final Function(Todo) onDelete;
+  final Function(Todo) onEdit; 
 
   const TodoTab({
     super.key,
@@ -14,16 +15,16 @@ class TodoTab extends StatelessWidget {
     required this.onAdd,
     required this.onToggle,
     required this.onDelete, 
-    required Null Function(int) onEdit, 
-    required Container drawer,
+    required this.onEdit, 
+    required Widget drawer, 
   });
-
 
   static const Color myPurple = Color.fromARGB(255, 195, 92, 236);
 
   String formatDateTime(DateTime d) {
     return "${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year} - ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}";
   }
+
 
   void _showAddDialog(BuildContext context) {
     final TextEditingController _taskController = TextEditingController();
@@ -117,6 +118,7 @@ class TodoTab extends StatelessWidget {
                   elevation: 0.5,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   child: ListTile(
+                    onTap: () => onEdit(t), 
                     leading: Checkbox(value: t.done, activeColor: myPurple, onChanged: (v) => onToggle(t, v)),
                     title: Text(t.title, style: TextStyle(decoration: t.done ? TextDecoration.lineThrough : null, fontWeight: FontWeight.bold)),
                     subtitle: Text(formatDateTime(t.time)),
