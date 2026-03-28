@@ -284,6 +284,8 @@ class _AppPageState extends State<AppPage> {
                 margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 child: ListTile(
+
+                  
                   onTap: () => _showEditNoteDialog(i), // Nhấn để sửa ghi chú
                   title: Text(n['text']),
                   subtitle: Text("${n['time'].hour}:${n['time'].minute.toString().padLeft(2, '0')}"),

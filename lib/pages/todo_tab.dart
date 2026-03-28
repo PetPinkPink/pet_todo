@@ -117,11 +117,10 @@ class TodoTab extends StatelessWidget {
                   elevation: 0.5,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   child: GestureDetector(
-                    // FIX: Thêm behavior để nhận diện chạm trên điện thoại tốt hơn
                     behavior: HitTestBehavior.opaque, 
                     onTap: () => onEdit(t), 
                     child: ListTile(
-                      // Tách Checkbox ra để không bị dính vào sự kiện onTap của cả hàng
+                      
                       leading: Checkbox(
                         value: t.done, 
                         activeColor: myPurple, 
