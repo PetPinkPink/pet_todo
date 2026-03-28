@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class NoteItem {
-  final String id;
+  String id;
   String content; 
   final DateTime time;
 
@@ -9,7 +9,6 @@ class NoteItem {
 }
 
 class NotesPage extends StatefulWidget {
-
   final String? username;
   const NotesPage({super.key, this.username});
 
@@ -18,12 +17,11 @@ class NotesPage extends StatefulWidget {
 }
 
 class _NotesPageState extends State<NotesPage> {
- 
   static const Color myPurple = Color.fromARGB(255, 194, 75, 237); 
   final TextEditingController _controller = TextEditingController();
 
   List<NoteItem> _notes = [
-    NoteItem(id: '1', content: "🐾 Chào mừng bạn đến với Pet Todo!", time: DateTime.now()),
+    NoteItem(id: '1', content: "🐾Chào mừng bạn đến với Pet Todo!", time: DateTime.now()),
   ];
 
   void _addNote() {
@@ -37,19 +35,18 @@ class _NotesPageState extends State<NotesPage> {
         ));
         _controller.clear();
       });
-    
-      FocusScope.of(context).unfocus();
+      FocusScope.of(context).unfocus(); 
     }
   }
 
+ 
   void _showEditNoteDialog(NoteItem note) {
     final TextEditingController editController = TextEditingController(text: note.content);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Sửa ghi chú", 
-          style: TextStyle(color: myPurple, fontWeight: FontWeight.bold)),
+        title: const Text("Sửa ghi chú", style: TextStyle(color: myPurple, fontWeight: FontWeight.bold)),
         content: TextField(
           controller: editController, 
           autofocus: true,
@@ -58,10 +55,7 @@ class _NotesPageState extends State<NotesPage> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("Hủy")),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: myPurple,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: myPurple, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
             onPressed: () {
               if (editController.text.trim().isNotEmpty) {
                 setState(() { note.content = editController.text.trim(); }); 
@@ -77,9 +71,6 @@ class _NotesPageState extends State<NotesPage> {
 
   void _deleteNote(String id) {
     setState(() { _notes.removeWhere((n) => n.id == id); });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Đã xóa ghi chú!"), behavior: SnackBarBehavior.floating, duration: Duration(seconds: 1))
-    );
   }
 
   @override
@@ -88,73 +79,71 @@ class _NotesPageState extends State<NotesPage> {
 
     return Scaffold(
      
+      resizeToAvoidBottomInset: true, 
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-    
-            Text(
-              widget.username != null ? "Ghi chú của ${widget.username}" : "Ghi chú cá nhân",
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: myPurple),
-            ),
-            const SizedBox(height: 20),
+      body: GestureDetector(
        
-            TextField(
-              controller: _controller,
-              style: TextStyle(color: isDark ? Colors.white : Colors.black),
-              decoration: InputDecoration(
-                hintText: "Ghi lại ý tưởng mới...",
-                filled: true,
-                fillColor: myPurple.withOpacity(0.1),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.send_rounded, color: myPurple), 
-                  onPressed: _addNote
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                Text(
+                  widget.username != null ? "Ghi chú của ${widget.username}" : "Ghi chú cá nhân",
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: myPurple),
                 ),
-              ),
-              onSubmitted: (_) => _addNote(),
-            ),
-            const SizedBox(height: 20),
-           
-            Expanded(
-              child: _notes.isEmpty 
-              ? const Center(child: Text("Chưa có ghi chú nào 🐾", style: TextStyle(color: Colors.grey)))
-              : ListView.builder(
-                itemCount: _notes.length,
-                itemBuilder: (context, index) {
-                  final note = _notes[index];
-                  return Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
-                    child: ListTile(
-                      onTap: () => _showEditNoteDialog(note),
-                      leading: const Icon(Icons.note_alt_outlined, color: myPurple),
-                      title: Text(
-                        note.content,
-                        style: TextStyle(
-                          color: isDark ? Colors.white : Colors.black87,
-                          fontWeight: FontWeight.w500
-                        ),
-                      ),
-                      subtitle: Text(
-                        "${note.time.hour}:${note.time.minute.toString().padLeft(2, '0')} - ${note.time.day}/${note.time.month}",
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_sweep_outlined, color: Colors.redAccent), 
-                        onPressed: () => _deleteNote(note.id)
-                      ),
+                const SizedBox(height: 20),
+                
+                // Ô NHẬP LIỆU
+                TextField(
+                  controller: _controller,
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                  decoration: InputDecoration(
+                    hintText: "Ghi lại ý tưởng mới...",
+                    filled: true,
+                    fillColor: myPurple.withOpacity(0.1),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.send_rounded, color: myPurple), 
+                      onPressed: _addNote
                     ),
-                  );
-                },
-              ),
+                  ),
+                  onSubmitted: (_) => _addNote(),
+                ),
+                const SizedBox(height: 20),
+                
+                // DANH SÁCH GHI CHÚ
+                Expanded(
+                  child: _notes.isEmpty 
+                  ? const Center(child: Text("Chưa có ghi chú nào 🐾", style: TextStyle(color: Colors.grey)))
+                  : ListView.builder(
+                      
+                      padding: const EdgeInsets.only(bottom: 20),
+                      itemCount: _notes.length,
+                      itemBuilder: (context, index) {
+                        final note = _notes[index];
+                        return Card(
+                          elevation: 2,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
+                          child: ListTile(
+                            onTap: () => _showEditNoteDialog(note),
+                            leading: const Icon(Icons.note_alt_outlined, color: myPurple),
+                            title: Text(note.content, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w500)),
+                            subtitle: Text("${note.time.hour}:${note.time.minute.toString().padLeft(2, '0')} - ${note.time.day}/${note.time.month}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                            trailing: IconButton(icon: const Icon(Icons.delete_sweep_outlined, color: Colors.redAccent), onPressed: () => _deleteNote(note.id)),
+                          ),
+                        );
+                      },
+                    ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
