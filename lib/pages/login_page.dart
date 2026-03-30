@@ -24,11 +24,11 @@ class _LoginPageState extends State<LoginPage> {
     String inputPass = pass.text.trim();
 
     if (inputUser.isEmpty || inputPass.isEmpty) {
-      _showSnackBar("Nhập đủ Username và Password đã nhé!");
+      _showSnackBar("Nhập đủ Username và Password");
       return;
     }
 
-    // Hiện loading
+    
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -65,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     } on DioException catch (e) {
       if (mounted) Navigator.pop(context); 
-      _showSnackBar("Sai tài khoản hoặc mật khẩu rồi!");
+      _showSnackBar("Sai tài khoản hoặc mật khẩu");
       debugPrint("Lỗi Login: ${e.message}");
     }
   }
@@ -130,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: myPurple, 
-                      foregroundColor: Colors.white, // Chữ trắng cho nổi
+                      foregroundColor: Colors.white, 
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
                     ),

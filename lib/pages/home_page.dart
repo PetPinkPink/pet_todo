@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; 
+import 'dart:io'; 
+import 'package:flutter/foundation.dart' show kIsWeb; 
 import 'main_app_screen.dart';
 import 'author_page.dart';
+
+
+String? globalImagePath;
 
 class HomePage extends StatefulWidget {
   final String username;
@@ -13,7 +19,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentDrawerIndex = -1; 
-
   static const Color myPurple = Color.fromARGB(255, 195, 88, 234);
 
   String getGreeting() {
@@ -23,11 +28,12 @@ class _HomePageState extends State<HomePage> {
     return "Chào buổi tối 🌙";
   }
 
-  void _showEmilyProfile(BuildContext context) {
-    Navigator.push(
+  void _showEmilyProfile(BuildContext context) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const EmilyProfilePage()),
     );
+    setState(() {}); 
   }
 
   @override
@@ -35,62 +41,21 @@ class _HomePageState extends State<HomePage> {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     final Color uniformBg = Theme.of(context).scaffoldBackgroundColor;
 
-    Widget welcomeScreen = Column(
-      children: [
-     
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Xin chào,", style: TextStyle(color: Colors.grey, fontSize: 14)),
-                  const Text(
-                    "Emily", 
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              GestureDetector(
-                onTap: () => _showEmilyProfile(context),
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(color: myPurple, shape: BoxShape.circle),
-                  child: const CircleAvatar(
-                    radius: 22,
-                    backgroundColor: Colors.white,
-                    backgroundImage: AssetImage('images/logo.png'), 
-                  ),
-                ),
-              ),
-            ],
+    Widget welcomeScreen = Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.pets, size: 100, color: myPurple),
+          const SizedBox(height: 25),
+          Text(getGreeting(), style: const TextStyle(fontSize: 20, color: Colors.grey)),
+          const SizedBox(height: 10),
+          Text(
+            widget.username, 
+            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: myPurple, letterSpacing: 1.1),
           ),
-        ),
-        
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.pets, size: 100, color: myPurple),
-              const SizedBox(height: 25),
-              Text(getGreeting(), style: const TextStyle(fontSize: 20, color: Colors.grey)),
-              const SizedBox(height: 10),
-              Text(
-                widget.username, 
-                style: const TextStyle(
-                  fontSize: 32, 
-                  fontWeight: FontWeight.bold, 
-                  color: myPurple,
-                  letterSpacing: 1.1
-                ),
-              ),
-              const SizedBox(height: 60), 
-            ],
-          ),
-        ),
-      ],
+          const SizedBox(height: 60), 
+        ],
+      ),
     );
 
     return Scaffold(
@@ -100,7 +65,7 @@ class _HomePageState extends State<HomePage> {
           onTap: () => setState(() => _currentDrawerIndex = -1),
           child: const Text("Pet Todo", style: TextStyle(fontWeight: FontWeight.bold)),
         ),
-        centerTitle: true,
+        centerTitle: false,
         backgroundColor: myPurple,
         foregroundColor: Colors.white,
         elevation: 0, 
@@ -114,6 +79,25 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
             onPressed: widget.onToggleTheme,
+          ),
+          
+          
+          Padding(
+            padding: const EdgeInsets.only(right: 15, left: 5),
+            child: GestureDetector(
+              onTap: () => _showEmilyProfile(context),
+              child: Container(
+                padding: const EdgeInsets.all(1.5),
+                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                child: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Colors.white,
+                  backgroundImage: globalImagePath != null
+                      ? (kIsWeb ? NetworkImage(globalImagePath!) : FileImage(File(globalImagePath!)) as ImageProvider)
+                      : const AssetImage('images/logo.png'), 
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -130,59 +114,27 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 50,
                       backgroundColor: Colors.white,
-                      backgroundImage: AssetImage('images/logo.png'),
+                      backgroundImage: globalImagePath != null
+                          ? (kIsWeb ? NetworkImage(globalImagePath!) : FileImage(File(globalImagePath!)) as ImageProvider)
+                          : const AssetImage('images/logo.png'),
                     ),
                     const SizedBox(height: 15),
-                    const Text(
-                      "Pet Todo", 
-                      style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)
-                    ),
+                    const Text("Pet Todo", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
               ListTile(
-                leading: Icon(
-                  Icons.apps, 
-                  color: _currentDrawerIndex == 0 ? myPurple : (isDark ? Colors.white70 : Colors.grey)
-                ),
-                title: Text(
-                  "App", 
-                  style: TextStyle(
-                    color: _currentDrawerIndex == 0 
-                        ? myPurple 
-                        : (isDark ? Colors.white : Colors.black87),
-                    fontWeight: _currentDrawerIndex == 0 ? FontWeight.bold : FontWeight.normal
-                  )
-                ),
-                selected: _currentDrawerIndex == 0,
-                onTap: () {
-                  setState(() => _currentDrawerIndex = 0);
-                  Navigator.pop(context);
-                },
+                leading: Icon(Icons.apps, color: _currentDrawerIndex == 0 ? myPurple : (isDark ? Colors.white70 : Colors.grey)),
+                title: Text("App", style: TextStyle(color: _currentDrawerIndex == 0 ? myPurple : (isDark ? Colors.white : Colors.black87))),
+                onTap: () { setState(() => _currentDrawerIndex = 0); Navigator.pop(context); },
               ),
               ListTile(
-                leading: Icon(
-                  Icons.person_outline, 
-                  color: _currentDrawerIndex == 1 ? myPurple : (isDark ? Colors.white70 : Colors.grey)
-                ),
-                title: Text(
-                  "Tác giả", 
-                  style: TextStyle(
-                    color: _currentDrawerIndex == 1 
-                        ? myPurple 
-                        : (isDark ? Colors.white : Colors.black87),
-                    fontWeight: _currentDrawerIndex == 1 ? FontWeight.bold : FontWeight.normal
-                  )
-                ),
-                selected: _currentDrawerIndex == 1,
-                onTap: () {
-                  setState(() => _currentDrawerIndex = 1);
-                  Navigator.pop(context);
-                },
+                leading: Icon(Icons.person_outline, color: _currentDrawerIndex == 1 ? myPurple : (isDark ? Colors.white70 : Colors.grey)),
+                title: Text("Tác giả", style: TextStyle(color: _currentDrawerIndex == 1 ? myPurple : (isDark ? Colors.white : Colors.black87))),
+                onTap: () { setState(() => _currentDrawerIndex = 1); Navigator.pop(context); },
               ),
               const Spacer(),
               const Divider(),
@@ -209,66 +161,95 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class EmilyProfilePage extends StatelessWidget {
+class EmilyProfilePage extends StatefulWidget {
   const EmilyProfilePage({super.key});
+  @override
+  State<EmilyProfilePage> createState() => _EmilyProfilePageState();
+}
+
+class _EmilyProfilePageState extends State<EmilyProfilePage> {
+  static const Color emilyPurple = Color.fromARGB(255, 195, 88, 234);
+  bool _isEditing = false;
+  final ImagePicker _picker = ImagePicker();
+
+  final _nameController = TextEditingController(text: 'Emily Smith');
+  final _emailController = TextEditingController(text: 'emily.smith@example.com');
+  final _phoneController = TextEditingController(text: '0 123 456 789');
+  final _birthdayController = TextEditingController(text: '15 tháng 5');
+  final _goalController = TextEditingController(text: 'Sống kỷ luật hơn, cố gắng hơn ngày hôm qua');
+
+  Future<void> _getImage() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        globalImagePath = pickedFile.path; 
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    const Color emilyPurple = Color.fromARGB(255, 195, 88, 234);
-    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Emily\'s Profile'),
         backgroundColor: emilyPurple,
-        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: Icon(_isEditing ? Icons.save : Icons.edit),
+            onPressed: () => setState(() => _isEditing = !_isEditing),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             const SizedBox(height: 20),
-            const CircleAvatar(
-              radius: 70,
-              backgroundColor: emilyPurple,
-              child: CircleAvatar(
-                radius: 66,
-                backgroundColor: Colors.white,
-                backgroundImage: AssetImage('images/logo.png'), 
-              ),
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 70,
+                  backgroundColor: emilyPurple,
+                  backgroundImage: globalImagePath != null 
+                    ? (kIsWeb ? NetworkImage(globalImagePath!) : FileImage(File(globalImagePath!)) as ImageProvider)
+                    : const AssetImage('images/logo.png'),
+                ),
+                if (_isEditing)
+                  Positioned(
+                    bottom: 0, right: 0,
+                    child: CircleAvatar(
+                      backgroundColor: emilyPurple,
+                      child: IconButton(icon: const Icon(Icons.camera_alt, color: Colors.white), onPressed: _getImage),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 25),
-            const Text(
-              'Emily Smith',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: emilyPurple),
-            ),
-            
-            
-            const SizedBox(height: 30),
-            
-            _buildProfileInfo(Icons.email_outlined, 'Email', 'emily.smith@example.com'),
-            _buildProfileInfo(Icons.phone_android_outlined, 'Số điện thoại', '0 123 456 789'),
-            _buildProfileInfo(Icons.cake_outlined, 'Ngày sinh', '19 tháng 11'),
-            _buildProfileInfo(Icons.pets_outlined, 'Mục tiêu', 'Sống kỷ luật hơn, cố gắng hơn ngày hôm qua'),
-            
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
+            _buildField("Họ tên", _nameController),
+            _buildField("Email", _emailController),
+            _buildField("Số điện thoại", _phoneController),
+            _buildField("Ngày sinh", _birthdayController),
+            _buildField("Mục tiêu", _goalController),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfileInfo(IconData icon, String title, String value) {
-    const Color emilyPurple = Color.fromARGB(255, 195, 88, 234);
-    
-    return Column(
-      children: [
-        ListTile(
-          leading: Icon(icon, color: emilyPurple),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text(value, style: const TextStyle(fontSize: 16)),
+  Widget _buildField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        enabled: _isEditing,
+        style: TextStyle(color: _isEditing ? emilyPurple : Colors.grey),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: emilyPurple),
+          border: _isEditing ? const OutlineInputBorder() : InputBorder.none,
+          disabledBorder: InputBorder.none,
         ),
-        const Divider(height: 1, indent: 70, endIndent: 20),
-      ],
+      ),
     );
   }
 }

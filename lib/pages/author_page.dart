@@ -96,7 +96,7 @@ class AuthorPage extends StatelessWidget {
                 
         
                 const Text(
-                  "\"Intargram: petpinkpink \"", 
+                  "\"Github: petpinkpink \"", 
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
